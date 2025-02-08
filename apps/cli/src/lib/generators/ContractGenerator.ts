@@ -14,10 +14,14 @@ export const generateContracts = (swaggerSchema: SwaggerSchema, enumType: EnumTy
       if (o.enum) {
         const view = {
           name: sanitizedName,
-          properties: rp(o, true, enumType),
+          properties: enumType==="enum"? rp(o, true): rp(o, false).replaceAll("|", ", "),
         };
+        
+        const template = enumType === "enum" 
+        ? "export enum {{ name }} {\n\t{{{ properties }}}\n};\n" 
+        : "export const {{ name }}s = [{{{ properties }}}] as const;\nexport type {{ name }} = (typeof {{ name }}s)[number];\n";
         return render(
-          `export enum {{ name }} {\n\t{{{ properties }}}\n};\n`,
+          template,
           view,
         );
       }

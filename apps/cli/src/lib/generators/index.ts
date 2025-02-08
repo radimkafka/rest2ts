@@ -52,6 +52,7 @@ export const generate = async (
   generateForAngular: boolean = false,
   isCookiesAuthEnabled: boolean = false,
   prefixesToRemove: string[] = [],
+  enumType: EnumType = "enum",
 ) => {
   const logStep = () => console.log("⚡2/3 - Generating code");
 
@@ -74,5 +75,5 @@ export const generate = async (
   logStep();
   return generateForAngular
     ? generateAngularContent(api, prefixesToRemove)
-    : generateContent(api, isCookiesAuthEnabled, prefixesToRemove);
+    : generateContent(api, isCookiesAuthEnabled, prefixesToRemove, enumType);
 };

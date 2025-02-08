@@ -53,7 +53,7 @@ export function getStatusCode(status: string, methodType: MethodType) {
 
 export const renderProperties =
   (swagger: SwaggerSchema) =>
-  (schema: Schema, isEnumDeclaration: boolean = false, enumType: EnumType = "enum"): string => {
+  (schema: Schema, isEnumDeclaration: boolean = false): string => {
     if (
       schema.type === "object" &&
       !!Object.keys(schema?.properties ?? {}).length

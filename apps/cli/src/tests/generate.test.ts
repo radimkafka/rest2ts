@@ -52,3 +52,8 @@ for (const name of cases) {
     });
   });
 }
+test("Generate string literal enum", async () => {
+  const api = await SwaggerParser.parse(fixturePath("reserved_words"));
+  const content = await generate(api, false, false, ["api_", "v1_"], "stringLiteral");
+  expect(content).toMatchFileSnapshot(snapshotPath(`string_literal_enum`));
+});
