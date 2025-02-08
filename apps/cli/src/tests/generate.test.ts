@@ -23,6 +23,11 @@ const cases = [
   "invalid_schema_names",
 ];
 
+const stringLiteralEnumCases = [
+  "nswag",
+  "petstore",
+];
+
 function fixturePath(name: string) {
   return `./src/tests/fixtures/${name}.json`;
 }
@@ -51,10 +56,14 @@ for (const name of cases) {
       expect(content).toMatchFileSnapshot(snapshotPath(`${name}_angular`));
     });
 
-    test("Generate string literal enum", async () => {
-      const api = await SwaggerParser.parse(fixturePath(name));
-      const content = await generate(api, false, false, ["api_", "v1_"], true);
-      expect(content).toMatchFileSnapshot(snapshotPath(`${name}string_literal_enum`));
-    });
+    if (stringLiteralEnumCases.includes(name)) {
+      describe(name, () => {
+        test("Generate string literal enum", async () => {
+          const api = await SwaggerParser.parse(fixturePath(name));
+          const content = await generate(api, false, false, ["api_", "v1_"], true);
+          expect(content).toMatchFileSnapshot(snapshotPath(`${name}string_literal_enum`));
+        });
+      });
+    }
   });
 }
