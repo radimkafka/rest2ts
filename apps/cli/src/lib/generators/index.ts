@@ -14,10 +14,10 @@ const generateContent = (
   schema: any,
   isCookiesAuthEnabled: boolean = false,
   prefixesToRemove: string[] = [],
-  enumType: EnumType = "enum",
+  useStringLiteralEnums = false,
 ) => {
   const swaggerSchema = schema as SwaggerSchema;
-  const contracts = generateContracts(swaggerSchema,enumType);
+  const contracts = generateContracts(swaggerSchema, useStringLiteralEnums);
 
   const view = {
     infrastructure: getInfrastructureTemplate(isCookiesAuthEnabled),
@@ -31,9 +31,9 @@ const generateContent = (
   return content;
 };
 
-const generateAngularContent = (schema: any, prefixesToRemove: string[]) => {
+const generateAngularContent = (schema: any, prefixesToRemove: string[], useStringLiteralEnums = false) => {
   const swaggerSchema = schema as SwaggerSchema;
-  const contracts = generateContracts(swaggerSchema);
+  const contracts = generateContracts(swaggerSchema, useStringLiteralEnums);
 
   const view = {
     contracts,
@@ -52,7 +52,7 @@ export const generate = async (
   generateForAngular: boolean = false,
   isCookiesAuthEnabled: boolean = false,
   prefixesToRemove: string[] = [],
-  enumType: EnumType = "enum",
+  useStringLiteralEnums = false,
 ) => {
   const logStep = () => console.log("⚡2/3 - Generating code");
 
@@ -68,12 +68,12 @@ export const generate = async (
 
     logStep();
     return generateForAngular
-      ? generateAngularContent(response.data, prefixesToRemove)
-      : generateContent(response.data, isCookiesAuthEnabled, prefixesToRemove);
+      ? generateAngularContent(response.data, prefixesToRemove, useStringLiteralEnums)
+      : generateContent(response.data, isCookiesAuthEnabled, prefixesToRemove, useStringLiteralEnums);
   }
 
   logStep();
   return generateForAngular
-    ? generateAngularContent(api, prefixesToRemove)
-    : generateContent(api, isCookiesAuthEnabled, prefixesToRemove, enumType);
+    ? generateAngularContent(api, prefixesToRemove, useStringLiteralEnums)
+    : generateContent(api, isCookiesAuthEnabled, prefixesToRemove, useStringLiteralEnums);
 };

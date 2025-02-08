@@ -382,60 +382,67 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type SmsSignDto = {
+	signatureHash: string;
+	code?: string | null;
+	contractID?: number | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export const CreateNewSignatureCommandResultStatuss = ["Success", "Fail"] as const;
+export type CreateNewSignatureCommandResultStatus = (typeof CreateNewSignatureCommandResultStatuss)[number];
+
+export type CreateNewSignatureCommand = {
+	smsSign: SmsSignDto;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type SignSmsCommandResult = {
+	signInResult?: SignInResult | null;
+	status: SignSmsCommandResultStatus;
+	error: ApiCallError;
+};
+
+export const SignSmsCommandResultStatuss = ["Success", "ContractFileNotExists", "Fail"] as const;
+export type SignSmsCommandResultStatus = (typeof SignSmsCommandResultStatuss)[number];
+
+export type SignInResult = {
+	accessToken: string;
+	encryptedAccessToken: string;
+	expireInSeconds: number;
+	userId: number;
+};
+
+export type ApiCallError = {
+	code: string;
+	message: string;
+	details: string;
+	validationErrors: {
+	message: string;
+	members: string[];
+}[];
+};
+
+export type PostSignatureSmsFetchResponse = 
+| FetchResponse<boolean, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const postSignatureSmsPath = () => `/api/signature/sms`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+export const postSignatureSms = (requestContract: CreateNewSignatureCommand, options?: FetchArgsOptions):
+  Promise<PostSignatureSmsFetchResponse> => {
+    const requestData = getApiRequestData<CreateNewSignatureCommand>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postSignatureSmsPath()}`, requestData, options) as Promise<PostSignatureSmsFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type PutSignatureSmsFetchResponse = 
+| FetchResponse<SignSmsCommandResult, 200> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const putSignatureSmsPath = () => `/api/signature/sms`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+export const putSignatureSms = (requestContract: SmsSignDto, options?: FetchArgsOptions):
+  Promise<PutSignatureSmsFetchResponse> => {
+    const requestData = getApiRequestData<SmsSignDto>(requestContract, false);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPut(`${getApiUrl()}${putSignatureSmsPath()}`, requestData, options) as Promise<PutSignatureSmsFetchResponse>;
 }

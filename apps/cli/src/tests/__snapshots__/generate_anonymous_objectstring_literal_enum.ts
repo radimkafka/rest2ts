@@ -382,60 +382,20 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ElectronicTradeBigRiskItemResponseDTO = {
+	id: number;
+	title?: string | null;
+	validationNumber?: number | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
-};
-
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type GetTestFetchResponse = 
+| FetchResponse<{status: string;
+	data: ElectronicTradeBigRiskItemResponseDTO;}, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getTestPath = () => `/api/test`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
-}
-
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
-| ErrorResponse;
-
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
-
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
-
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+export const getTest = (options?: FetchArgsOptions):
+  Promise<GetTestFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getTestPath()}`, options, {}) as Promise<GetTestFetchResponse>;
 }

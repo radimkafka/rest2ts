@@ -53,7 +53,7 @@ export function getStatusCode(status: string, methodType: MethodType) {
 
 export const renderProperties =
   (swagger: SwaggerSchema) =>
-  (schema: Schema, isEnumDeclaration: boolean = false): string => {
+  (schema: Schema, isEnumDeclaration: boolean = false, useStringLiteralEnums = false): string => {
     if (
       schema.type === "object" &&
       !!Object.keys(schema?.properties ?? {}).length
@@ -97,7 +97,7 @@ export const renderProperties =
         schema.type === "integer" ? `_${name}` : name;
 
       return isEnumDeclaration
-        ? schema.enum.map(e => `${handleEnumName(e)} = "${e}"`).join(",\n\t")
+        ? ( useStringLiteralEnums?schema.enum.map(e => `"${e}"`).join(", "):schema.enum.map(e => `${handleEnumName(e)} = "${e}"`).join(",\n\t"))
         : schema.enum.map(e => `"${e}"`).join(" | ");
     } else if (schema.allOf) {
       return schema.allOf

@@ -382,60 +382,55 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
+export const ElectronicTradeFormalityEnums = ["BlueAgreement", "AML", "Termination", "TransferUnderSAB", "Change", "LoanProtocolHandover", "TradeProducerProtocol", "Modelation", "Other", "ZZJ", "TradeIdentificationForm", "NewInstruction", "LoanRequest", "ESIP", "Contract"] as const;
+export type ElectronicTradeFormalityEnum = (typeof ElectronicTradeFormalityEnums)[number];
 
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ErrorDetailDTO = {
+	code: string;
+	message: string;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type ExceptionDTO = {
+	errors?: { [key: string | number]: ErrorDetailDTO[] } | null;
+	type?: string | null;
+	title?: string | null;
+	status?: number | null;
+	detail?: string | null;
+	instance?: string | null;
+	stackTrace?: { [key: string | number]: ExceptionStackTraceItemDTO[] } | null;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type ExceptionStackTraceItemDTO = {
+	file?: string | null;
+	line?: number | null;
+	function?: string | null;
+	class?: string | null;
+	type?: string | null;
+};
+
+export type ElectronicTradeFormalityDataRequestDTO = {
+	formalityType: ElectronicTradeFormalityEnum;
+	sendByPostOffice?: boolean | null;
+	targetRelationId?: number | null;
+};
+
+export type ElectronicTradeFormalityRequestDTO = {
+	data: ElectronicTradeFormalityDataRequestDTO;
+	"files[]": File[];
+};
+
+export type PostElectronicTradeTradesElectronicTradeIdFormalityFetchResponse = 
+| FetchResponse<void, 204> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const postElectronicTradeTradesElectronicTradeIdFormalityPath = (electronicTradeId: number, fields?: string) => `/api/electronic-trade/trades/${electronicTradeId}/formality`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const postElectronicTradeTradesElectronicTradeIdFormality = (requestContract: ElectronicTradeFormalityRequestDTO, electronicTradeId: number, fields?: string, options?: FetchArgsOptions):
+  Promise<PostElectronicTradeTradesElectronicTradeIdFormalityFetchResponse> => {
     const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
-}
-
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
-| ErrorResponse;
-
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
-
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
+      "fields": fields
     };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+    const requestData = getApiRequestData<ElectronicTradeFormalityRequestDTO>(requestContract, true);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPost(`${getApiUrl()}${postElectronicTradeTradesElectronicTradeIdFormalityPath(electronicTradeId)}`, requestData, options, queryParams) as Promise<PostElectronicTradeTradesElectronicTradeIdFormalityFetchResponse>;
 }

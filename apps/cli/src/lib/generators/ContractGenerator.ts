@@ -3,7 +3,7 @@ import { SwaggerSchema } from "../models/SwaggerSchema";
 import { renderProperties, sanitizeTypeName } from "./Common";
 import { EnumType } from "../models/EnumType";
 
-export const generateContracts = (swaggerSchema: SwaggerSchema, enumType: EnumType = "enum") => {
+export const generateContracts = (swaggerSchema: SwaggerSchema, useStringLiteralEnums = false) => {
   const rp = renderProperties(swaggerSchema);
 
   const rows = Object.keys(swaggerSchema.components?.schemas || [])
@@ -14,10 +14,10 @@ export const generateContracts = (swaggerSchema: SwaggerSchema, enumType: EnumTy
       if (o.enum) {
         const view = {
           name: sanitizedName,
-          properties: enumType==="enum"? rp(o, true): rp(o, false).replaceAll("|", ", "),
+          properties: rp(o, true, useStringLiteralEnums),
         };
         
-        const template = enumType === "enum" 
+        const template = !useStringLiteralEnums 
         ? "export enum {{ name }} {\n\t{{{ properties }}}\n};\n" 
         : "export const {{ name }}s = [{{{ properties }}}] as const;\nexport type {{ name }} = (typeof {{ name }}s)[number];\n";
         return render(

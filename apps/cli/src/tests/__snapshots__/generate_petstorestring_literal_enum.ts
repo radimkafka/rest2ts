@@ -382,60 +382,311 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ApiResponse = {
+	code: number;
+	type: string;
+	message: string;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type Category = {
+	id: number;
+	name: string;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type Pet = {
+	id: number;
+	category: Category;
+	name: string;
+	photoUrls: string[];
+	tags: Tag[];
+	status: "available" | "pending" | "sold";
+};
+
+export type Tag = {
+	id: number;
+	name: string;
+};
+
+export type Order = {
+	id: number;
+	petId: number;
+	quantity: number;
+	shipDate: string;
+	status: "placed" | "approved" | "delivered";
+	complete: boolean;
+};
+
+export type User = {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	phone: string;
+	userStatus: number;
+};
+
+export type PostPetPetIdUploadImageFetchResponse = 
+| FetchResponse<ApiResponse, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const postPetPetIdUploadImagePath = (petId: number) => `/pet/${petId}/uploadImage`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+export const postPetPetIdUploadImage = (petId: number, options?: FetchArgsOptions):
+  Promise<PostPetPetIdUploadImageFetchResponse> => {
+    const requestData = getApiRequestData<object>(undefined, true);
+
+    return apiPost(`${getApiUrl()}${postPetPetIdUploadImagePath(petId)}`, requestData, options) as Promise<PostPetPetIdUploadImageFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type PostPetFetchResponse = 
+| FetchResponse<void, 405> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const postPetPath = () => `/pet`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
+export const postPet = (requestContract: Pet, options?: FetchArgsOptions):
+  Promise<PostPetFetchResponse> => {
+    const requestData = getApiRequestData<Pet>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postPetPath()}`, requestData, options) as Promise<PostPetFetchResponse>;
+}
+
+export type PutPetFetchResponse = 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| FetchResponse<void, 405> 
+| ErrorResponse;
+
+export const putPetPath = () => `/pet`;
+
+export const putPet = (requestContract: Pet, options?: FetchArgsOptions):
+  Promise<PutPetFetchResponse> => {
+    const requestData = getApiRequestData<Pet>(requestContract, false);
+
+    return apiPut(`${getApiUrl()}${putPetPath()}`, requestData, options) as Promise<PutPetFetchResponse>;
+}
+
+export type GetPetFindByStatusFetchResponse = 
+| FetchResponse<Pet[], 200> 
+| FetchResponse<void, 400> 
+| ErrorResponse;
+
+export const getPetFindByStatusPath = () => `/pet/findByStatus`;
+
+export const getPetFindByStatus = (status: string[], options?: FetchArgsOptions):
+  Promise<GetPetFindByStatusFetchResponse> => {
     const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+      "status": status
+    }
+    return apiGet(`${getApiUrl()}${getPetFindByStatusPath()}`, options, queryParams) as Promise<GetPetFindByStatusFetchResponse>;
+}
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+export type GetPetFindByTagsFetchResponse = 
+| FetchResponse<Pet[], 200> 
+| FetchResponse<void, 400> 
+| ErrorResponse;
+
+export const getPetFindByTagsPath = () => `/pet/findByTags`;
+
+export const getPetFindByTags = (tags: string[], options?: FetchArgsOptions):
+  Promise<GetPetFindByTagsFetchResponse> => {
+    const queryParams = {
+      "tags": tags
+    }
+    return apiGet(`${getApiUrl()}${getPetFindByTagsPath()}`, options, queryParams) as Promise<GetPetFindByTagsFetchResponse>;
+}
+
+export type GetPetPetIdFetchResponse = 
+| FetchResponse<Pet, 200> 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const getPetPetIdPath = (petId: number) => `/pet/${petId}`;
+
+export const getPetPetId = (petId: number, options?: FetchArgsOptions):
+  Promise<GetPetPetIdFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getPetPetIdPath(petId)}`, options, {}) as Promise<GetPetPetIdFetchResponse>;
+}
+
+export type DeletePetPetIdFetchResponse = 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const deletePetPetIdPath = (petId: number) => `/pet/${petId}`;
+
+export const deletePetPetId = (petId: number, options?: FetchArgsOptions):
+  Promise<DeletePetPetIdFetchResponse> => {
+    return apiDelete(`${getApiUrl()}${deletePetPetIdPath(petId)}`, options, {}) as Promise<DeletePetPetIdFetchResponse>;
+}
+
+export type PostPetPetIdFetchResponse = 
+| FetchResponse<void, 405> 
+| ErrorResponse;
+
+export const postPetPetIdPath = (petId: number) => `/pet/${petId}`;
+
+export const postPetPetId = (petId: number, options?: FetchArgsOptions):
+  Promise<PostPetPetIdFetchResponse> => {
+    const requestData = getApiRequestData<object>(undefined, false);
+
+    return apiPost(`${getApiUrl()}${postPetPetIdPath(petId)}`, requestData, options) as Promise<PostPetPetIdFetchResponse>;
+}
+
+export type GetStoreInventoryFetchResponse = 
+| FetchResponse<object, 200> 
+| ErrorResponse;
+
+export const getStoreInventoryPath = () => `/store/inventory`;
+
+export const getStoreInventory = (options?: FetchArgsOptions):
+  Promise<GetStoreInventoryFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getStoreInventoryPath()}`, options, {}) as Promise<GetStoreInventoryFetchResponse>;
+}
+
+export type PostStoreOrderFetchResponse = 
+| FetchResponse<Order, 200> 
+| FetchResponse<void, 400> 
+| ErrorResponse;
+
+export const postStoreOrderPath = () => `/store/order`;
+
+export const postStoreOrder = (requestContract: Order, options?: FetchArgsOptions):
+  Promise<PostStoreOrderFetchResponse> => {
+    const requestData = getApiRequestData<Order>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postStoreOrderPath()}`, requestData, options) as Promise<PostStoreOrderFetchResponse>;
+}
+
+export type GetStoreOrderOrderIdFetchResponse = 
+| FetchResponse<Order, 200> 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const getStoreOrderOrderIdPath = (orderId: number) => `/store/order/${orderId}`;
+
+export const getStoreOrderOrderId = (orderId: number, options?: FetchArgsOptions):
+  Promise<GetStoreOrderOrderIdFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getStoreOrderOrderIdPath(orderId)}`, options, {}) as Promise<GetStoreOrderOrderIdFetchResponse>;
+}
+
+export type DeleteStoreOrderOrderIdFetchResponse = 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const deleteStoreOrderOrderIdPath = (orderId: number) => `/store/order/${orderId}`;
+
+export const deleteStoreOrderOrderId = (orderId: number, options?: FetchArgsOptions):
+  Promise<DeleteStoreOrderOrderIdFetchResponse> => {
+    return apiDelete(`${getApiUrl()}${deleteStoreOrderOrderIdPath(orderId)}`, options, {}) as Promise<DeleteStoreOrderOrderIdFetchResponse>;
+}
+
+export type PostUserCreateWithListFetchResponse = 
+| FetchResponse<void, 201> 
+| ErrorResponse;
+
+export const postUserCreateWithListPath = () => `/user/createWithList`;
+
+export const postUserCreateWithList = (requestContract: User[], options?: FetchArgsOptions):
+  Promise<PostUserCreateWithListFetchResponse> => {
+    const requestData = getApiRequestData<User[]>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postUserCreateWithListPath()}`, requestData, options) as Promise<PostUserCreateWithListFetchResponse>;
+}
+
+export type GetUserUsernameFetchResponse = 
+| FetchResponse<User, 200> 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const getUserUsernamePath = (username: string) => `/user/${username}`;
+
+export const getUserUsername = (username: string, options?: FetchArgsOptions):
+  Promise<GetUserUsernameFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getUserUsernamePath(username)}`, options, {}) as Promise<GetUserUsernameFetchResponse>;
+}
+
+export type DeleteUserUsernameFetchResponse = 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const deleteUserUsernamePath = (username: string) => `/user/${username}`;
+
+export const deleteUserUsername = (username: string, options?: FetchArgsOptions):
+  Promise<DeleteUserUsernameFetchResponse> => {
+    return apiDelete(`${getApiUrl()}${deleteUserUsernamePath(username)}`, options, {}) as Promise<DeleteUserUsernameFetchResponse>;
+}
+
+export type PutUserUsernameFetchResponse = 
+| FetchResponse<void, 400> 
+| FetchResponse<void, 404> 
+| ErrorResponse;
+
+export const putUserUsernamePath = (username: string) => `/user/${username}`;
+
+export const putUserUsername = (requestContract: User, username: string, options?: FetchArgsOptions):
+  Promise<PutUserUsernameFetchResponse> => {
+    const requestData = getApiRequestData<User>(requestContract, false);
+
+    return apiPut(`${getApiUrl()}${putUserUsernamePath(username)}`, requestData, options) as Promise<PutUserUsernameFetchResponse>;
+}
+
+export type GetUserLoginFetchResponse = 
+| FetchResponse<string, 200> 
+| FetchResponse<void, 400> 
+| ErrorResponse;
+
+export const getUserLoginPath = () => `/user/login`;
+
+export const getUserLogin = (username: string, password: string, options?: FetchArgsOptions):
+  Promise<GetUserLoginFetchResponse> => {
+    const queryParams = {
+      "username": username,
+      "password": password
+    }
+    return apiGet(`${getApiUrl()}${getUserLoginPath()}`, options, queryParams) as Promise<GetUserLoginFetchResponse>;
+}
+
+export type GetUserLogoutFetchResponse = 
+| FetchResponse<void, 200> 
+| ErrorResponse;
+
+export const getUserLogoutPath = () => `/user/logout`;
+
+export const getUserLogout = (options?: FetchArgsOptions):
+  Promise<GetUserLogoutFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getUserLogoutPath()}`, options, {}) as Promise<GetUserLogoutFetchResponse>;
+}
+
+export type PostUserCreateWithArrayFetchResponse = 
+| FetchResponse<void, 201> 
+| ErrorResponse;
+
+export const postUserCreateWithArrayPath = () => `/user/createWithArray`;
+
+export const postUserCreateWithArray = (requestContract: User[], options?: FetchArgsOptions):
+  Promise<PostUserCreateWithArrayFetchResponse> => {
+    const requestData = getApiRequestData<User[]>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postUserCreateWithArrayPath()}`, requestData, options) as Promise<PostUserCreateWithArrayFetchResponse>;
+}
+
+export type PostUserFetchResponse = 
+| FetchResponse<void, 201> 
+| ErrorResponse;
+
+export const postUserPath = () => `/user`;
+
+export const postUser = (requestContract: User, options?: FetchArgsOptions):
+  Promise<PostUserFetchResponse> => {
+    const requestData = getApiRequestData<User>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postUserPath()}`, requestData, options) as Promise<PostUserFetchResponse>;
 }

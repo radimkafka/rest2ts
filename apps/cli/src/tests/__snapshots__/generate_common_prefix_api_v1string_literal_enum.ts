@@ -382,60 +382,107 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ApiProblemDetails = {
+	errors: { [key: string | number]: ErrorDetail[] };
+	type?: string | null;
+	title?: string | null;
+	status?: number | null;
+	detail?: string | null;
+	instance?: string | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type ErrorDetail = {
+	code: ErrorCode;
+	message?: string | null;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export const ErrorCodes = ["Unspecified", "OutOfRange", "NotFound", "Invalid", "Forbidden", "TooManyRequests", "Conflict", "NullOrEmpty", "Unauthorized", "ExternalProviderNotAvailable"] as const;
+export type ErrorCode = (typeof ErrorCodes)[number];
+
+export type ProblemDetails = {
+	type?: string | null;
+	title?: string | null;
+	status?: number | null;
+	detail?: string | null;
+	instance?: string | null;
+};
+
+export type EntityListOfUserListItemDto = {
+	offset: number;
+	limit: number;
+	totalCount: number;
+	items: UserListItemDto[];
+};
+
+export type UserListItemDto = {
+	userID: number;
+	login: string;
+	firstName: string;
+	lastName: string;
+	dateCreated: string;
+};
+
+export type UserDetailDto = {
+	userID: number;
+	login: string;
+	email: string;
+	firstName?: string | null;
+	lastName?: string | null;
+	lastSignInDate?: string | null;
+	phone?: string | null;
+	userIdentityProviders: IdentityProvider[];
+	profilePicture?: string | null;
+	status: UserStatus;
+};
+
+export const IdentityProviders = ["Application", "Google", "BankID"] as const;
+export type IdentityProvider = (typeof IdentityProviders)[number];
+
+export const UserStatuss = ["Unknown", "Active", "WaitingForEmailConfirmation"] as const;
+export type UserStatus = (typeof UserStatuss)[number];
+
+export type SaveUserNotificationSettingsCommandResult = {};
+
+export type UserNotificationUpdateRequest = {
+	isEmailNotificationActive: boolean;
+};
+
+export type GetCodeListCollectionQueryResult = {
+	countries: CodeListItemDto[];
+};
+
+export type CodeListItemDto = {
+	id: number;
+	code: string;
+	name: string;
+};
+
+export type GetUsersFetchResponse = 
+| FetchResponse<EntityListOfUserListItemDto, 200> 
+| FetchResponse<ApiProblemDetails, 401> 
+| FetchResponse<ProblemDetails, 500> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getUsersPath = () => `/api/v1/users`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getUsers = (offset?: number, limit?: number, options?: FetchArgsOptions):
+  Promise<GetUsersFetchResponse> => {
     const queryParams = {
-      "lang": lang
+      "offset": offset,
+      "limit": limit
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+    return apiGet(`${getApiUrl()}${getUsersPath()}`, options, queryParams) as Promise<GetUsersFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type GetUsersUserIDFetchResponse = 
+| FetchResponse<UserDetailDto, 200> 
+| FetchResponse<ApiProblemDetails, 401> 
+| FetchResponse<ProblemDetails, 500> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const getUsersUserIDPath = (userID: number) => `/api/v1/users/${userID}`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
-
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+export const getUsersUserID = (userID: number, options?: FetchArgsOptions):
+  Promise<GetUsersUserIDFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getUsersUserIDPath(userID)}`, options, {}) as Promise<GetUsersUserIDFetchResponse>;
 }

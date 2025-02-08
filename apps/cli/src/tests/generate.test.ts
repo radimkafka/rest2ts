@@ -50,10 +50,11 @@ for (const name of cases) {
       const content = await generate(api, true, true, ["api_", "v1_"]);
       expect(content).toMatchFileSnapshot(snapshotPath(`${name}_angular`));
     });
+
+    test("Generate string literal enum", async () => {
+      const api = await SwaggerParser.parse(fixturePath(name));
+      const content = await generate(api, false, false, ["api_", "v1_"], true);
+      expect(content).toMatchFileSnapshot(snapshotPath(`${name}string_literal_enum`));
+    });
   });
 }
-test("Generate string literal enum", async () => {
-  const api = await SwaggerParser.parse(fixturePath("reserved_words"));
-  const content = await generate(api, false, false, ["api_", "v1_"], "stringLiteral");
-  expect(content).toMatchFileSnapshot(snapshotPath(`string_literal_enum`));
-});

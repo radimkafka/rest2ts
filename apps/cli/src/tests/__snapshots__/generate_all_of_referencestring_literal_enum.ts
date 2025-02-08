@@ -410,32 +410,32 @@ export type UpdateSessionModel = {
 	sectionCode: string;
 };
 
-export type GetEntityForFetchResponse = 
+export type GetCountryCodeEntityIdFetchResponse = 
 | FetchResponse<string, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getCountryCodeEntityIdPath = (countryCode: CountryCode, id: string) => `/${countryCode}/Entity/${id}`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getCountryCodeEntityId = (countryCode: CountryCode, id: string, lang?: string, options?: FetchArgsOptions):
+  Promise<GetCountryCodeEntityIdFetchResponse> => {
     const queryParams = {
       "lang": lang
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+    return apiGet(`${getApiUrl()}${getCountryCodeEntityIdPath(countryCode, id)}`, options, queryParams) as Promise<GetCountryCodeEntityIdFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
+export type PutCountryCodeSessionsSessionIdFetchResponse = 
 | FetchResponse<Session, 200> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const putCountryCodeSessionsSessionIdPath = (countryCode: CountryCode, sessionId: string, lang?: string) => `/${countryCode}/Sessions/${sessionId}`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
+export const putCountryCodeSessionsSessionId = (requestContract: UpdateSessionModel, countryCode: CountryCode, sessionId: string, lang?: string, options?: FetchArgsOptions):
+  Promise<PutCountryCodeSessionsSessionIdFetchResponse> => {
     const queryParams = {
       "lang": lang
     };
     const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPut(`${getApiUrl()}${putCountryCodeSessionsSessionIdPath(countryCode, sessionId)}`, requestData, options, queryParams) as Promise<PutCountryCodeSessionsSessionIdFetchResponse>;
 }

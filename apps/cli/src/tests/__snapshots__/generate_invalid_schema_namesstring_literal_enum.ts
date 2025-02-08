@@ -382,60 +382,29 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
+export const Domain_SessionStatuss = ["active", "activeLockedForAnonymous", "expired", "readOnly"] as const;
+export type Domain_SessionStatus = (typeof Domain_SessionStatuss)[number];
 
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type Domain_TransportationMode = {
+	code: Domain_TransportationMode_TransportationModeCode;
+	name: string;
+	history?: Domain_TransportationMode_TransportationModeCode[] | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
-};
+export const Domain_TransportationMode_TransportationModeCodes = ["car", "plane", "other"] as const;
+export type Domain_TransportationMode_TransportationModeCode = (typeof Domain_TransportationMode_TransportationModeCodes)[number];
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type GetCampaignsFetchResponse = 
+| FetchResponse<Domain_TransportationMode[], 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getCampaignsPath = () => `/Campaigns`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getCampaigns = (transportationModeCode: Domain_TransportationMode_TransportationModeCode, lang?: string, options?: FetchArgsOptions):
+  Promise<GetCampaignsFetchResponse> => {
     const queryParams = {
+      "transportationModeCode": transportationModeCode,
       "lang": lang
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
-}
-
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
-| ErrorResponse;
-
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
-
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
-
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiGet(`${getApiUrl()}${getCampaignsPath()}`, options, queryParams) as Promise<GetCampaignsFetchResponse>;
 }

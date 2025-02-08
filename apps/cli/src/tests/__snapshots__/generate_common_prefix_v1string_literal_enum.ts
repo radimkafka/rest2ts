@@ -382,60 +382,35 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
 export type Session = {
 	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
-};
-
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type PostVerifyFetchResponse = 
+| FetchResponse<void, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const postVerifyPath = () => `/v1/verify`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+export const postVerify = (body: string, options?: FetchArgsOptions):
+  Promise<PostVerifyFetchResponse> => {
+    const requestData = getApiRequestData<string>(body, false);
+
+    return apiPost(`${getApiUrl()}${postVerifyPath()}`, requestData, options) as Promise<PostVerifyFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type PostCountryCodeSessionsFetchResponse = 
+| FetchResponse<Session, 201> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const postCountryCodeSessionsPath = (countryCode?: string, lang?: string) => `/v1/${countryCode}/Sessions`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
+export const postCountryCodeSessions = (countryCode?: string, lang?: string, options?: FetchArgsOptions):
+  Promise<PostCountryCodeSessionsFetchResponse> => {
     const queryParams = {
       "lang": lang
     };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+    const requestData = getApiRequestData<object>(undefined, false);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPost(`${getApiUrl()}${postCountryCodeSessionsPath(countryCode)}`, requestData, options, queryParams) as Promise<PostCountryCodeSessionsFetchResponse>;
 }

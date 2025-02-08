@@ -382,60 +382,142 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
+export const ContractTypeCodes = ["BEN", "CONSIGNMENT", "DYN", "FCG", "LIBERO_RS", "OKP", "OKS_FKI", "OKS_Investor", "OKS_LC", "OKS_LC_EX", "OKS_LC_EX_", "OKSP_LC", "OKSP_LC_EX", "OKSP_LC_EX_", "RS_INVCZK", "RS_INVCZKSELF", "RS_INVEUR", "RS_INVEURSELF", "RS_INVPROFICZK", "RS_OKSmartFondy", "RS_OKSmartFondy_EX", "RS_OKSmartFondy_EX_", "RS_OKSmartProdukty", "RS_OKSmartProdukty_EX", "RS_OKSmartProdukty_EX_"] as const;
+export type ContractTypeCode = (typeof ContractTypeCodes)[number];
 
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ProductItemDto = {
+	className?: string | null;
+	order?: number | null;
+	singleMinInvestment?: number | null;
+	singleMaxInvestment?: number | null;
+	singleDefaultInvestment?: number | null;
+	periodicalMinInvestment?: number | null;
+	periodicalMaxInvestment?: number | null;
+	periodicalDefaultInvestment?: number | null;
+	color?: string | null;
+	hasPeriodicalRedemption?: boolean | null;
+	minPerformance?: number | null;
+	maxPerformance?: number | null;
+	productCode?: string | null;
+	isin?: string | null;
+	productName?: string | null;
+	productSingleSS?: string | null;
+	productPeriodicalSS?: string | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type ProcessBankIDVerificationCommandResult = {
+	status: ProcessBankIDVerificationCommandResultStatus;
+	profile?: BankIDProfileResponse | null;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export const ProcessBankIDVerificationCommandResultStatuss = ["BankIDUserInfoError", "Success", "Fail", "VerificationAlreadyExists"] as const;
+export type ProcessBankIDVerificationCommandResultStatus = (typeof ProcessBankIDVerificationCommandResultStatuss)[number];
+
+export type BankIDProfileResponse = {
+	sub: string;
+	txn: string;
+	verified_claims?: VerifiedClaimsDto | null;
+	given_name: string;
+	family_name: string;
+	gender: string;
+	birthdate: string;
+	birthnumber?: string | null;
+	age: number;
+	majority: boolean;
+	date_of_death: any;
+	birthplace: string;
+	primary_nationality: string;
+	nationalities: string[];
+	maritalstatus: string;
+	email: string;
+	phone_number: string;
+	pep: boolean;
+	limited_legal_capacity: boolean;
+	addresses: Address[];
+	idcards: Idcard[];
+	paymentAccounts: string[];
+	updated_at: number;
+};
+
+export type VerifiedClaimsDto = {
+	verification?: Verification | null;
+	claims: Claims;
+};
+
+export type Verification = {
+	trust_framework?: string | null;
+	verification_process: string;
+};
+
+export type Claims = {
+	given_name: string;
+	family_name: string;
+	gender: string;
+	birthdate: string;
+	addresses: Address[];
+	idcards: Idcard[];
+};
+
+export type Address = {
+	type: string;
+	street: string;
+	buildingapartment: string;
+	streetnumber: string;
+	city: string;
+	zipcode: string;
+	country: string;
+	ruian_reference: string;
+};
+
+export type Idcard = {
+	type: string;
+	description: string;
+	country: string;
+	number: string;
+	valid_to: string;
+	issuer: string;
+	issue_date: string;
+};
+
+export type OneOfArrayDto = {
+	changedProperties: (string | number)[];
+};
+
+export type GetBankIDVerifyBankIdFetchResponse = 
+| FetchResponse<ProcessBankIDVerificationCommandResult, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getBankIDVerifyBankIdPath = () => `/api/BankID/verify-bank-id`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getBankIDVerifyBankId = (token?: string | undefined | null, options?: FetchArgsOptions):
+  Promise<GetBankIDVerifyBankIdFetchResponse> => {
     const queryParams = {
-      "lang": lang
+      "token": token
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+    return apiGet(`${getApiUrl()}${getBankIDVerifyBankIdPath()}`, options, queryParams) as Promise<GetBankIDVerifyBankIdFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type GetProductListFetchResponse = 
+| FetchResponse<ProductItemDto[], 200> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const getProductListPath = () => `/api/product/list`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
+export const getProductList = (contractTypeCode?: ContractTypeCode | undefined | null, options?: FetchArgsOptions):
+  Promise<GetProductListFetchResponse> => {
     const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+      "contractTypeCode": contractTypeCode
+    }
+    return apiGet(`${getApiUrl()}${getProductListPath()}`, options, queryParams) as Promise<GetProductListFetchResponse>;
+}
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+export type GetOneOfArrayFetchResponse = 
+| FetchResponse<OneOfArrayDto[], 200> 
+| ErrorResponse;
+
+export const getOneOfArrayPath = () => `/api/oneOf/array`;
+
+export const getOneOfArray = (options?: FetchArgsOptions):
+  Promise<GetOneOfArrayFetchResponse> => {
+    return apiGet(`${getApiUrl()}${getOneOfArrayPath()}`, options, {}) as Promise<GetOneOfArrayFetchResponse>;
 }

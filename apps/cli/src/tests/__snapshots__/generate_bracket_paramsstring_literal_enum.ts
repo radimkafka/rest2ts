@@ -382,60 +382,47 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type ErrorDetailDTO = {
+	code: string;
+	message: string;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type ExceptionDTO = {
+	errors?: { [key: string | number]: ErrorDetailDTO[] } | null;
+	type?: string | null;
+	title?: string | null;
+	status?: number | null;
+	detail?: string | null;
+	instance?: string | null;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type ProducerItemDTO = {
+	id: number;
+	title: string;
+};
+
+export type ProductItemDTO = {
+	id_product: number;
+	title: string;
+	hidden?: boolean | null;
+};
+
+export type GetProducersFetchResponse = 
+| FetchResponse<ProducerItemDTO[], 200> 
+| FetchResponse<ExceptionDTO, 401> 
+| FetchResponse<ExceptionDTO, 403> 
+| FetchResponse<ExceptionDTO, 500> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getProducersPath = () => `/api/producers`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getProducers = (filterTerm?: string, filterHidden?: number, filterRegion?: string, filterCategory?: string, options?: FetchArgsOptions):
+  Promise<GetProducersFetchResponse> => {
     const queryParams = {
-      "lang": lang
+      "filter[term]": filterTerm,
+      "filter[hidden]": filterHidden,
+      "filter[region]": filterRegion,
+      "filter[category]": filterCategory
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
-}
-
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
-| ErrorResponse;
-
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
-
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
-
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiGet(`${getApiUrl()}${getProducersPath()}`, options, queryParams) as Promise<GetProducersFetchResponse>;
 }

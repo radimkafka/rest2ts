@@ -382,60 +382,35 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
 export type Session = {
 	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
-};
-
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type PostCountryCodeVerifyV2FetchResponse = 
+| FetchResponse<void, 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const postCountryCodeVerifyV2Path = () => `/v2/{countryCode}/verify`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+export const postCountryCodeVerifyV2 = (body: string, options?: FetchArgsOptions):
+  Promise<PostCountryCodeVerifyV2FetchResponse> => {
+    const requestData = getApiRequestData<string>(body, false);
+
+    return apiPost(`${getApiUrl()}${postCountryCodeVerifyV2Path()}`, requestData, options) as Promise<PostCountryCodeVerifyV2FetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type PostCountryCodeSessionsV2FetchResponse = 
+| FetchResponse<Session, 201> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const postCountryCodeSessionsV2Path = (countryCode?: string, lang?: string) => `/v2/${countryCode}/Sessions`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
+export const postCountryCodeSessionsV2 = (countryCode?: string, lang?: string, options?: FetchArgsOptions):
+  Promise<PostCountryCodeSessionsV2FetchResponse> => {
     const queryParams = {
       "lang": lang
     };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+    const requestData = getApiRequestData<object>(undefined, false);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPost(`${getApiUrl()}${postCountryCodeSessionsV2Path(countryCode)}`, requestData, options, queryParams) as Promise<PostCountryCodeSessionsV2FetchResponse>;
 }

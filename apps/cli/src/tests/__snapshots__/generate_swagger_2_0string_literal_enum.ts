@@ -382,60 +382,100 @@ export function apiPatch<TResponse extends FetchResponse<unknown, number>, TRequ
 }
 // INFRASTRUCTURE END
 
-export const CountryCodes = ["sk", "cz", "pl", "hu", "ro", "bg"] as const;
-export type CountryCode = (typeof CountryCodes)[number];
-
-export type Session = {
-	sessionId: string;
-	createdDate: string;
-	updatedAt?: string | null;
-	countryCode: CountryCode;
-	claimNumber?: string | null;
-	policyId?: string | null;
-	policyNumber: string;
-	isPolicyVerified?: boolean | null;
-	policyTypeCode: string;
-	sectionCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sessionUUID?: string | null;
+export type SearchResponse = {
+	Data: SearchDto;
+	Errors: string[];
+	Status: Status;
 };
 
-export type UpdateSessionModel = {
-	sessionId: string;
-	policyNumber: string;
-	policyTypeCode: string;
-	stepNumber: number;
-	maxStepNumber: number;
-	sectionCode: string;
+export type LoginDataDataContract = {
+	Login: string;
+	Password: string;
 };
 
-export type GetEntityForFetchResponse = 
-| FetchResponse<string, 200> 
+export type SearchDto = {
+	DO_NUM: string;
+	EV_RANG: number;
+	EV_LIB: string;
+	EV_DATREAL: string;
+	EV_HREREAL: string;
+	EV_URGENCE: string;
+	EV_AGENDA: string;
+	EV_COD: string;
+	EV_PSEUDO: string;
+	EV_Deadline: string;
+	EV_DeadlineTime: string;
+	EV_DeadlineSendCounter: number;
+	EV_Alarm: boolean;
+	EV_AgendaWorkerKey: string;
+	EV_Status: string;
+	EV_InsertUser: string;
+};
+
+export type IPA_PlexDbContext_ContractSignature = {
+	ID: number;
+	ContractNo: string;
+	RoleProviderId: number;
+	Signature: string;
+	UP_Id: number;
+	SignatureType: number;
+	VisibilityTypes: ("None" | "Partners" | "Client")[];
+};
+
+export const Statuss = ["ValidationError", "OK", "Exception", "InvalidOperation"] as const;
+export type Status = (typeof Statuss)[number];
+
+export type GetAgendaSearchFetchResponse = 
+| FetchResponse<SearchResponse[], 200> 
 | ErrorResponse;
 
-export const getEntityForPath = ($for: string) => `/Entity/${$for}`;
+export const getAgendaSearchPath = () => `/api/Agenda/Search`;
 
-export const getEntityFor = ($for: string, lang?: string, options?: FetchArgsOptions):
-  Promise<GetEntityForFetchResponse> => {
+export const getAgendaSearch = (do_num: string, dO_Id?: number, options?: FetchArgsOptions):
+  Promise<GetAgendaSearchFetchResponse> => {
     const queryParams = {
-      "lang": lang
+      "do_num": do_num,
+      "dO_Id": dO_Id
     }
-    return apiGet(`${getApiUrl()}${getEntityForPath($for)}`, options, queryParams) as Promise<GetEntityForFetchResponse>;
+    return apiGet(`${getApiUrl()}${getAgendaSearchPath()}`, options, queryParams) as Promise<GetAgendaSearchFetchResponse>;
 }
 
-export type PutSessionsArgumentsFetchResponse = 
-| FetchResponse<Session, 200> 
+export type PostApiUsersIsUserValidFetchResponse = 
+| FetchResponse<object, 200> 
+| FetchResponse<number, 201> 
 | ErrorResponse;
 
-export const putSessionsArgumentsPath = ($arguments: string, lang?: string) => `/Sessions/${$arguments}`;
+export const postApiUsersIsUserValidPath = () => `/api/ApiUsers/IsUserValid`;
 
-export const putSessionsArguments = (requestContract: UpdateSessionModel, $arguments: string, lang?: string, options?: FetchArgsOptions):
-  Promise<PutSessionsArgumentsFetchResponse> => {
-    const queryParams = {
-      "lang": lang
-    };
-    const requestData = getApiRequestData<UpdateSessionModel>(requestContract, false);
+export const postApiUsersIsUserValid = (requestContract: LoginDataDataContract, options?: FetchArgsOptions):
+  Promise<PostApiUsersIsUserValidFetchResponse> => {
+    const requestData = getApiRequestData<LoginDataDataContract>(requestContract, false);
 
-    return apiPut(`${getApiUrl()}${putSessionsArgumentsPath($arguments)}`, requestData, options, queryParams) as Promise<PutSessionsArgumentsFetchResponse>;
+    return apiPost(`${getApiUrl()}${postApiUsersIsUserValidPath()}`, requestData, options) as Promise<PostApiUsersIsUserValidFetchResponse>;
+}
+
+export type PostContractEditContractSignaturesFetchResponse = 
+| FetchResponse<object, 200> 
+| ErrorResponse;
+
+export const postContractEditContractSignaturesPath = () => `/api/Contract/EditContractSignatures`;
+
+export const postContractEditContractSignatures = (requestContract: IPA_PlexDbContext_ContractSignature[], options?: FetchArgsOptions):
+  Promise<PostContractEditContractSignaturesFetchResponse> => {
+    const requestData = getApiRequestData<IPA_PlexDbContext_ContractSignature[]>(requestContract, false);
+
+    return apiPost(`${getApiUrl()}${postContractEditContractSignaturesPath()}`, requestData, options) as Promise<PostContractEditContractSignaturesFetchResponse>;
+}
+
+export type PatchCaseUpdateCaseTypeCaseNoCaseTypeFetchResponse = 
+| FetchResponse<object, 200> 
+| ErrorResponse;
+
+export const patchCaseUpdateCaseTypeCaseNoCaseTypePath = (caseNo: string, caseType: string) => `/api/Case/UpdateCaseType/${caseNo}/${caseType}`;
+
+export const patchCaseUpdateCaseTypeCaseNoCaseType = (caseNo: string, caseType: string, options?: FetchArgsOptions):
+  Promise<PatchCaseUpdateCaseTypeCaseNoCaseTypeFetchResponse> => {
+    const requestData = getApiRequestData<object>(undefined, false);
+
+    return apiPatch(`${getApiUrl()}${patchCaseUpdateCaseTypeCaseNoCaseTypePath(caseNo, caseType)}`, requestData, options) as Promise<PatchCaseUpdateCaseTypeCaseNoCaseTypeFetchResponse>;
 }
