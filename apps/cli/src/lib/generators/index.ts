@@ -8,14 +8,16 @@ import { generateServices } from "./ServiceGenerator";
 import axios from "axios";
 import { generateAngularServices } from "./AngularServiceGenerator";
 import { render } from "../renderers/Renderer";
+import { EnumType } from "../models/EnumType";
 
 const generateContent = (
   schema: any,
   isCookiesAuthEnabled: boolean = false,
   prefixesToRemove: string[] = [],
+  enumType: EnumType = "enum",
 ) => {
   const swaggerSchema = schema as SwaggerSchema;
-  const contracts = generateContracts(swaggerSchema);
+  const contracts = generateContracts(swaggerSchema,enumType);
 
   const view = {
     infrastructure: getInfrastructureTemplate(isCookiesAuthEnabled),

@@ -2,6 +2,7 @@ import { Schema, SwaggerSchema } from "../models/SwaggerSchema";
 import { EndpointDescription, MethodType } from "./ApiDescriptionGenerator";
 import { render } from "../renderers/Renderer";
 import { Just, Maybe } from "purify-ts";
+import { EnumType } from "../models/EnumType";
 
 export const sanitizeTypeName = (typeName: string | undefined) =>
   typeName?.replace(/[^a-zA-Z0-9]/g, "_");
@@ -52,7 +53,7 @@ export function getStatusCode(status: string, methodType: MethodType) {
 
 export const renderProperties =
   (swagger: SwaggerSchema) =>
-  (schema: Schema, isEnumDeclaration: boolean = false): string => {
+  (schema: Schema, isEnumDeclaration: boolean = false, enumType: EnumType = "enum"): string => {
     if (
       schema.type === "object" &&
       !!Object.keys(schema?.properties ?? {}).length

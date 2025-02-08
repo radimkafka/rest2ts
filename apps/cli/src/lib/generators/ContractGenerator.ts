@@ -1,8 +1,9 @@
 import { render } from "../renderers/Renderer";
 import { SwaggerSchema } from "../models/SwaggerSchema";
 import { renderProperties, sanitizeTypeName } from "./Common";
+import { EnumType } from "../models/EnumType";
 
-export const generateContracts = (swaggerSchema: SwaggerSchema) => {
+export const generateContracts = (swaggerSchema: SwaggerSchema, enumType: EnumType = "enum") => {
   const rp = renderProperties(swaggerSchema);
 
   const rows = Object.keys(swaggerSchema.components?.schemas || [])
@@ -13,7 +14,7 @@ export const generateContracts = (swaggerSchema: SwaggerSchema) => {
       if (o.enum) {
         const view = {
           name: sanitizedName,
-          properties: rp(o, true),
+          properties: rp(o, true, enumType),
         };
         return render(
           `export enum {{ name }} {\n\t{{{ properties }}}\n};\n`,
