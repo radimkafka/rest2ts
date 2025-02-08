@@ -26,6 +26,7 @@ const cases = [
 const stringLiteralEnumCases = [
   "nswag",
   "petstore",
+  "reserved_words",
 ];
 
 function fixturePath(name: string) {
@@ -61,7 +62,7 @@ for (const name of cases) {
         test("Generate string literal enum", async () => {
           const api = await SwaggerParser.parse(fixturePath(name));
           const content = await generate(api, false, false, ["api_", "v1_"], true);
-          expect(content).toMatchFileSnapshot(snapshotPath(`${name}string_literal_enum`));
+          expect(content).toMatchFileSnapshot(snapshotPath(`${name}_string_literal_enum`));
         });
       });
     }
